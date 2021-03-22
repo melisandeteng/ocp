@@ -1,0 +1,17 @@
+trainer: energy
+
+dataset:
+  - src: /miniscratch/tengmeli/ocp/H2O_data_bis.lmdb
+    normalize_labels: True
+    target_mean: -403.4768
+    target_std: 244.4944
+  - src: /miniscratch/tengmeli/ocp/H2O_data_bis.lmdb
+logger: tensorboard
+
+task:
+  dataset: single_point_lmdb
+  description: "Relaxed state energy prediction from initial structure."
+  type: regression
+  metric: mae
+  labels:
+    - relaxed energy
