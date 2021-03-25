@@ -1,5 +1,5 @@
 includes:
-- configs/is2re/all/base_h2o.yml
+- /home/mila/t/tengmeli/ocp_meli/configs/is2re/all/base_h2o.yml
 
 model:
   name: dimenetplusplus
