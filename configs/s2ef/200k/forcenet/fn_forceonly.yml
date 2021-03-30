@@ -1,8 +1,8 @@
 trainer: forces
 
 dataset:
-  - src: data/s2ef/200k/train/
-  - src: data/s2ef/all/val_id/
+  - src: explo/s2ef/200k/train/
+  - src: explo/s2ef/all/val_id/
 
 model:
   name: forcenet

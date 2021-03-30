@@ -65,7 +65,7 @@ class WandBLogger(Logger):
     def log_plots(self, plots, caption=""):
         assert isinstance(plots, list)
         plots = [wandb.Image(x, caption=caption) for x in plots]
-        wandb.log({"data": plots})
+        wandb.log({"explo": plots})
 
 
 @registry.register_logger("tensorboard")

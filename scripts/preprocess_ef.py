@@ -33,7 +33,7 @@ def write_images_to_lmdb(mp_arg):
     pbar = tqdm(
         total=5000 * len(samples),
         position=pid,
-        desc="Preprocessing data into LMDBs",
+        desc="Preprocessing explo into LMDBs",
     )
     for sample in samples:
         traj_logs = open(sample, "r").read().splitlines()
@@ -99,7 +99,7 @@ def main(args):
 
     # Initialize lmdb paths
     db_paths = [
-        os.path.join(args.out_path, "data.%04d.lmdb" % i)
+        os.path.join(args.out_path, "explo.%04d.lmdb" % i)
         for i in range(args.num_workers)
     ]
 
@@ -136,7 +136,7 @@ def main(args):
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--data-path",
+        "--explo-path",
         help="Path to dir containing *.extxyz and *.txt files",
     )
     parser.add_argument(
@@ -158,9 +158,9 @@ def get_parser():
         "--ref-energy", action="store_true", help="Subtract reference energies"
     )
     parser.add_argument(
-        "--test-data",
+        "--test-explo",
         action="store_true",
-        help="Is data being processed test data?",
+        help="Is explo being processed test explo?",
     )
     return parser
 

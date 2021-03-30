@@ -31,7 +31,7 @@ class AtomsToGraphs:
     them into graph representations for use in PyTorch. The primary purpose of this class is to determine the
     nearest neighbors within some radius around each individual atom, taking into account PBC, and set the
     pair index and distance between atom pairs appropriately. Lastly, atomic properties and the graph information
-    are put into a PyTorch geometric data object for use with PyTorch.
+    are put into a PyTorch geometric explo object for use with PyTorch.
 
     Args:
         max_neigh (int): Maximum number of neighbors to consider.
@@ -123,7 +123,7 @@ class AtomsToGraphs:
             atoms (ase.atoms.Atoms): An ASE atoms object.
 
         Returns:
-            data (torch_geometric.data.Data): A torch geometic data object with edge_index, positions, atomic_numbers,
+            explo (torch_geometric.explo.Data): A torch geometic explo object with edge_index, positions, atomic_numbers,
             and optionally, energy, forces, and distances.
             Optional properties can included by setting r_property=True when constructing the class.
         """
@@ -134,7 +134,7 @@ class AtomsToGraphs:
         cell = torch.Tensor(atoms.get_cell()).view(1, 3, 3)
         natoms = positions.shape[0]
 
-        # put the minimum data in torch geometric data object
+        # put the minimum explo in torch geometric explo object
         data = Data(
             cell=cell,
             pos=positions,
@@ -189,11 +189,11 @@ class AtomsToGraphs:
             collate_and_save (bool): A boolean to collate and save or not. Default is False, so will not write a file.
 
         Returns:
-            data_list (list of torch_geometric.data.Data):
-            A list of torch geometric data objects containing molecular graph info and properties.
+            data_list (list of torch_geometric.explo.Data):
+            A list of torch geometric explo objects containing molecular graph info and properties.
         """
 
-        # list for all data
+        # list for all explo
         data_list = []
         if isinstance(atoms_collection, list):
             atoms_iter = atoms_collection

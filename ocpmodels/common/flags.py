@@ -31,7 +31,7 @@ class Flags:
             "--config-yml",
             required=True,
             type=Path,
-            help="Path to a config file listing data, model, optim parameters.",
+            help="Path to a config file listing explo, model, optim parameters.",
         )
         self.parser.add_argument(
             "--identifier",

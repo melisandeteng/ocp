@@ -6,22 +6,22 @@ import ocpmodels
 
 """
 This script provides users with an automated way to download, preprocess (where
-applicable), and organize data to readily be used by the existing config files.
+applicable), and organize explo to readily be used by the existing config files.
 """
 
 DOWNLOAD_LINKS = {
     "s2ef": {
-        "200k": "https://dl.fbaipublicfiles.com/opencatalystproject/data/s2ef_train_200K.tar",
-        "2M": "https://dl.fbaipublicfiles.com/opencatalystproject/data/s2ef_train_2M.tar",
-        "20M": "https://dl.fbaipublicfiles.com/opencatalystproject/data/s2ef_train_20M.tar",
-        "all": "https://dl.fbaipublicfiles.com/opencatalystproject/data/s2ef_train_all.tar",
-        "val_id": "https://dl.fbaipublicfiles.com/opencatalystproject/data/s2ef_val_id.tar",
-        "val_ood_ads": "https://dl.fbaipublicfiles.com/opencatalystproject/data/s2ef_val_ood_ads.tar",
-        "val_ood_cat": "https://dl.fbaipublicfiles.com/opencatalystproject/data/s2ef_val_ood_cat.tar",
-        "val_ood_both": "https://dl.fbaipublicfiles.com/opencatalystproject/data/s2ef_val_ood_both.tar",
-        "test": "https://dl.fbaipublicfiles.com/opencatalystproject/data/s2ef_test_lmdbs.tar.gz",
+        "200k": "https://dl.fbaipublicfiles.com/opencatalystproject/explo/s2ef_train_200K.tar",
+        "2M": "https://dl.fbaipublicfiles.com/opencatalystproject/explo/s2ef_train_2M.tar",
+        "20M": "https://dl.fbaipublicfiles.com/opencatalystproject/explo/s2ef_train_20M.tar",
+        "all": "https://dl.fbaipublicfiles.com/opencatalystproject/explo/s2ef_train_all.tar",
+        "val_id": "https://dl.fbaipublicfiles.com/opencatalystproject/explo/s2ef_val_id.tar",
+        "val_ood_ads": "https://dl.fbaipublicfiles.com/opencatalystproject/explo/s2ef_val_ood_ads.tar",
+        "val_ood_cat": "https://dl.fbaipublicfiles.com/opencatalystproject/explo/s2ef_val_ood_cat.tar",
+        "val_ood_both": "https://dl.fbaipublicfiles.com/opencatalystproject/explo/s2ef_val_ood_both.tar",
+        "test": "https://dl.fbaipublicfiles.com/opencatalystproject/explo/s2ef_test_lmdbs.tar.gz",
     },
-    "is2re": "https://dl.fbaipublicfiles.com/opencatalystproject/data/is2res_train_val_test_lmdbs.tar.gz",
+    "is2re": "https://dl.fbaipublicfiles.com/opencatalystproject/explo/is2res_train_val_test_lmdbs.tar.gz",
 }
 
 S2EF_COUNTS = {
@@ -39,7 +39,7 @@ S2EF_COUNTS = {
 
 
 def get_data(task, split, del_intmd_files):
-    datadir = os.path.join(os.path.dirname(ocpmodels.__path__[0]), "data")
+    datadir = os.path.join(os.path.dirname(ocpmodels.__path__[0]), "explo")
     os.makedirs(datadir, exist_ok=True)
 
     if task == "s2ef" and split is None:
@@ -72,7 +72,7 @@ def get_data(task, split, del_intmd_files):
     if task == "s2ef" and split == "test":
         os.system(f"mv {dirname}/test_data/s2ef/all/test_* {datadir}/s2ef/all")
     elif task == "is2re":
-        os.system(f"mv {dirname}/data/is2re {datadir}")
+        os.system(f"mv {dirname}/explo/is2re {datadir}")
 
     if del_intmd_files:
         cleanup(filename, dirname)
@@ -125,12 +125,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, help="Task to download")
     parser.add_argument(
-        "--split", type=str, help="Corresponding data split to download"
+        "--split", type=str, help="Corresponding explo split to download"
     )
     parser.add_argument(
         "--keep",
         action="store_true",
-        help="Keep intermediate directories and files upon data retrieval/processing",
+        help="Keep intermediate directories and files upon explo retrieval/processing",
     )
     # Flags for S2EF train/val set preprocessing:
     parser.add_argument(

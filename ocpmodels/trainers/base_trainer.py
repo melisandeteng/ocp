@@ -353,7 +353,7 @@ class BaseTrainer:
                 self.model, device_ids=[self.device]
             )
 
-    def load_pretrained(self, checkpoint_path=None, ddp_to_dp=False):
+    def load_pretrained(self, checkpoint_path=None, ddp_to_dp=True):
         if checkpoint_path is None or os.path.isfile(checkpoint_path) is False:
             print(f"Checkpoint: {checkpoint_path} not found!")
             return False
@@ -369,6 +369,7 @@ class BaseTrainer:
             new_dict = OrderedDict()
             for k, v in checkpoint["state_dict"].items():
                 name = k[7:]
+
                 new_dict[name] = v
             self.model.load_state_dict(new_dict)
         else:
@@ -726,6 +727,7 @@ class BaseTrainer:
             self.optimizer.step()
 
     def save_results(self, predictions, results_file, keys):
+
         if results_file is None:
             return
 
@@ -733,46 +735,49 @@ class BaseTrainer:
             self.config["cmd"]["results_dir"],
             f"{self.name}_{results_file}_{distutils.get_rank()}.npz",
         )
+
         np.savez_compressed(
             results_file_path,
             ids=predictions["id"],
             **{key: predictions[key] for key in keys},
         )
 
-        distutils.synchronize()
-        if distutils.is_master():
-            gather_results = defaultdict(list)
-            full_path = os.path.join(
-                self.config["cmd"]["results_dir"],
-                f"{self.name}_{results_file}.npz",
-            )
+        #distutils.synchronize()
 
-            for i in range(distutils.get_world_size()):
-                rank_path = os.path.join(
-                    self.config["cmd"]["results_dir"],
-                    f"{self.name}_{results_file}_{i}.npz",
-                )
-                rank_results = np.load(rank_path, allow_pickle=True)
-                gather_results["ids"].extend(rank_results["ids"])
-                for key in keys:
-                    gather_results[key].extend(rank_results[key])
-                os.remove(rank_path)
-
-            # Because of how distributed sampler works, some system ids
-            # might be repeated to make no. of samples even across GPUs.
-            _, idx = np.unique(gather_results["ids"], return_index=True)
-            gather_results["ids"] = np.array(gather_results["ids"])[idx]
-            for k in keys:
-                if k == "forces":
-                    gather_results[k] = np.concatenate(
-                        np.array(gather_results[k])[idx]
-                    )
-                elif k == "chunk_idx":
-                    gather_results[k] = np.cumsum(
-                        np.array(gather_results[k])[idx]
-                    )[:-1]
-                else:
-                    gather_results[k] = np.array(gather_results[k])[idx]
-
-            print(f"Writing results to {full_path}")
-            np.savez_compressed(full_path, **gather_results)
+        # if False :
+        #     if distutils.is_master():
+        #     gather_results = defaultdict(list)
+        #     full_path = os.path.join(
+        #         self.config["cmd"]["results_dir"],
+        #         f"{self.name}_{results_file}.npz",
+        #     )
+        #
+        #     for i in range(distutils.get_world_size()):
+        #         rank_path = os.path.join(
+        #             self.config["cmd"]["results_dir"],
+        #             f"{self.name}_{results_file}_{i}.npz",
+        #         )
+        #         rank_results = np.load(rank_path, allow_pickle=True)
+        #         gather_results["ids"].extend(rank_results["ids"])
+        #         for key in keys:
+        #             gather_results[key].extend(rank_results[key])
+        #         os.remove(rank_path)
+        #
+        #     # Because of how distributed sampler works, some system ids
+        #     # might be repeated to make no. of samples even across GPUs.
+        #     _, idx = np.unique(gather_results["ids"], return_index=True)
+        #     gather_results["ids"] = np.array(gather_results["ids"])[idx]
+        #     for k in keys:
+        #         if k == "forces":
+        #             gather_results[k] = np.concatenate(
+        #                 np.array(gather_results[k])[idx]
+        #             )
+        #         elif k == "chunk_idx":
+        #             gather_results[k] = np.cumsum(
+        #                 np.array(gather_results[k])[idx]
+        #             )[:-1]
+        #         else:
+        #             gather_results[k] = np.array(gather_results[k])[idx]
+        #
+        #     print(f"Writing results to {full_path}")
+        #     np.savez_compressed(full_path, **gather_results)

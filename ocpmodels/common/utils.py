@@ -122,7 +122,7 @@ def plot_histogram(data, xlabel="", ylabel="", title=""):
     return image_from_plot
 
 
-# Override the collation method in `pytorch_geometric.data.InMemoryDataset`
+# Override the collation method in `pytorch_geometric.explo.InMemoryDataset`
 def collate(data_list):
     keys = data_list[0].keys
     data = data_list[0].__class__()

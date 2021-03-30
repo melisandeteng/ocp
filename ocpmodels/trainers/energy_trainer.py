@@ -186,7 +186,7 @@ class EnergyTrainer(BaseTrainer):
         self.model.eval()
         if self.normalizers is not None and "target" in self.normalizers:
             self.normalizers["target"].to(self.device)
-        predictions = {"id": [], "energy": []}
+        predictions = {"id": [], "energy": [], "target" : []}
 
         for i, batch in tqdm(
             enumerate(loader),
@@ -202,10 +202,18 @@ class EnergyTrainer(BaseTrainer):
                 out["energy"] = self.normalizers["target"].denorm(
                     out["energy"]
                 )
+
+
+
+            energy_target = [b.y_relaxed.detach().cpu().numpy() - b.y_init.detach().cpu().numpy() for b in batch]
+
             predictions["id"].extend([str(i) for i in batch[0].sid.tolist()])
             predictions["energy"].extend(out["energy"].tolist())
+            predictions["target"].extend(energy_target)
 
-        self.save_results(predictions, results_file, keys=["energy"])
+
+
+        self.save_results(predictions, results_file, keys=["energy", "target"])
         return predictions
 
     def train(self):
