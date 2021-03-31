@@ -14,6 +14,7 @@ import pickle
 from tqdm import tqdm
 import torch
 import os
+import json
 
 def read_trajectory_extract_features(a2g, traj_path):
     traj = ase.io.read(traj_path, ":")
@@ -24,12 +25,18 @@ def read_trajectory_extract_features(a2g, traj_path):
     data_objects[1].tags = torch.LongTensor(tags)
     return data_objects
 
-def make_lmdb(system_paths, db_name):
+def make_lmdb(system_paths, db_name, ref_energies_file=None):
     """
     arguments:
         system_paths: list of paths to .traj files
         db_name: "db_name.lmdb" where to save the file 
     """
+    substract_ref = False
+    if ref_energies_file is not None:
+        substract_ref = True
+        with open(ref_energies_file, 'r') as f:
+            ref_energies = json.load(f)
+            
     a2g = AtomsToGraphs(
         max_neigh=50,
         radius=6,
@@ -50,13 +57,20 @@ def make_lmdb(system_paths, db_name):
     idx = 0
     for system in system_paths:
     # Extract Data object
+        
         data_objects = read_trajectory_extract_features(a2g, system)
-        initial_struc = data_objects[0]
+        initial_struc = data_objects[0] 
         relaxed_struc = data_objects[1]
 
-        initial_struc.y_init = initial_struc.y # subtract off reference energy, if applicable
+        initial_struc.y_init = initial_struc.y  # subtract off reference energy, if applicable
         del initial_struc.y
         initial_struc.y_relaxed = relaxed_struc.y # subtract off reference energy, if applicable
+        if substract_ref:
+            print("susbtracting ref")
+            object_id = os.path.basename(system).split(".")[0]
+            ref_energy = ref_energies[object_id]
+            initial_struc.y_init -= ref_energy
+            initial_struc.y_relaxed -= ref_energy
         initial_struc.pos_relaxed = relaxed_struc.pos
 
     # Filter data if necessary
@@ -92,6 +106,11 @@ def get_parser():
         "--dbname",
         help="db name",
     )
+    
+    parser.add_argument(
+        "--refenergy",
+        help="db name",
+    )
     return parser
 
 
@@ -104,5 +123,5 @@ if __name__=="__main__":
     
     system_paths = [os.path.join(args.root, fn) for fn in filenames]
     
-    make_lmdb(system_paths, args.dbname)
+    make_lmdb(system_paths, args.dbname, args.refenergy)
     print("saved file in " + args.dbname)
