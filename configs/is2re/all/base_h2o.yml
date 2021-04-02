@@ -1,11 +1,11 @@
 trainer: energy
 
 dataset:
-  - src: /miniscratch/tengmeli/ocp/train_H2O.lmdb
+  - src: /miniscratch/tengmeli/ocp/train_H2O_ref.lmdb
     normalize_labels: True
-    target_mean: -5.4565 #-403.4768
-    target_std: 3.7140 #244.4944
-  - src: /miniscratch/tengmeli/ocp/val_H2O.lmdb
+    target_mean: -0.7057 #-403.4768
+    target_std: 0.9228 #244.4944
+  - src: /miniscratch/tengmeli/ocp/val_H2O_ref.lmdb
 logger: tensorboard
 
 task:
