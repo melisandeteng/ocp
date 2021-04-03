@@ -71,6 +71,7 @@ def make_lmdb(system_paths, db_name, ref_energies_file=None):
             ref_energy = ref_energies[object_id]
             initial_struc.y_init -= ref_energy
             initial_struc.y_relaxed -= ref_energy
+            initial_struc.system = object_id
         initial_struc.pos_relaxed = relaxed_struc.pos
 
     # Filter data if necessary
