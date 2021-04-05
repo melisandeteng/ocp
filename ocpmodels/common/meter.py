@@ -112,7 +112,7 @@ class Meter:
             # If training split, print mean over the past window_size points.
             elif "train" in self.split:
                 loss_str.append("{}: {:.4f}".format(name, meter.avg))
-            # If val / test splits, print global average over the entire split.
+            # If val / test splits_new, print global average over the entire split.
             elif "val" in self.split or "test" in self.split:
                 loss_str.append("{}: {:.4f}".format(name, meter.global_avg))
             else:

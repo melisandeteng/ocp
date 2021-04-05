@@ -1,7 +1,9 @@
 import pickle
 from pymatgen.core.composition import Composition
 import numpy as np
+import json
 LIST = []
+
 with open('all_list.txt', 'r') as file :
 
     for line in file.readlines() :

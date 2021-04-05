@@ -103,7 +103,7 @@ def main(args):
         for i in range(args.num_workers)
     ]
 
-    # Chunk the trajectories into args.num_workers splits
+    # Chunk the trajectories into args.num_workers splits_new
     chunked_txt_files = np.array_split(xyz_logs, args.num_workers)
 
     # Extract features

@@ -27,7 +27,7 @@ def main(paths, filename):
 if __name__ == "__main__":
     """
     Create a submission file for evalAI. Ensure that for the task you are
-    submitting for you have generated results files on each of the 4 splits -
+    submitting for you have generated results files on each of the 4 splits_new -
     id, ood_ads, ood_cat, ood_both.
 
     Results file can be obtained as follows for the various tasks:

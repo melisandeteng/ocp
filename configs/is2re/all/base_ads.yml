@@ -1,0 +1,21 @@
+trainer: energy
+
+dataset:
+  - src: /miniscratch/tengmeli/ocp/train_ads.lmdb
+    normalize_labels: True
+    target_mean: -5.4565 #-403.4768
+    target_std: 3.7140 #244.4944
+  - src: /miniscratch/tengmeli/ocp/val_ads.lmdb
+  - src: /miniscratch/tengmeli/ocp/test_ads.lmdb
+    normalize_labels: True
+    target_mean: -1.525913953781128 #-403.4768
+    target_std: 2.279365062713623 #244.4944
+logger: tensorboard
+
+task:
+  dataset: single_point_lmdb
+  description: "Relaxed state energy prediction from initial structure."
+  type: regression
+  metric: mae
+  labels:
+    - relaxed energy
