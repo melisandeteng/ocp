@@ -8,11 +8,11 @@
 #SBATCH --partition=long
 #SBATCH --mail-user=assouelr@mila.quebec
 #SBATCH --mail-type=ALL
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:16gb:1
 #SBATCH --mem=5G
 #SBATCH --exclude=rtx7,kepler4,cn-a006,cn-a007
-#SBATCH --time=0:10:0
-#SBATCH --job-name=ocp_pred
+#SBATCH --time=9:10:0
+#SBATCH --job-name=ocp_train_cat
 #SBATCH --ntasks-per-node=1
 
 module load anaconda/3
@@ -36,6 +36,17 @@ echo $dist_url
 
 #srun python main.py --mode predict --config-yml /home/mila/a/assouelr/ocp/configs/is2re/all/dimenet_plus_plus/dpp.yml --checkpoint /miniscratch/tengmeli/ocp/h2o_model//checkpoint.pt
 
-#srun python main.py --mode train --config-yml /home/mila/a/assouelr/ocp/configs/is2re/all/dimenet_plus_plus/dpp.yml
+srun python main.py --mode train --config-yml /home/mila/a/assouelr/ocp/configs/is2re/all/dimenet_plus_plus/dpp.yml
 
-srun python scripts/make_lmdb.py --root /miniscratch/tengmeli/ocp/is2res_train_trajectories --paths-file "/home/mila/t/tengmeli/ocp_meli/explo/splits_new/ood_cat/test_files_cat.txt" --dbname "/miniscratch/tengmeli/ocp/LMDB/test_cat.lmdb" --refenergy "/home/mila/t/tengmeli/ocp_meli/data/ref_energy_all.json"
+#COND TRAINING
+#srun python main.py --mode train --config-yml /home/mila/a/assouelr/ocp/configs/is2re/all/dimenet_plus_plus_hyper/dpp_hyper.yml
+#srun python scripts/make_lmdb.py --root /miniscratch/tengmeli/ocp/is2res_train_trajectories --paths-file "/home/mila/t/tengmeli/ocp_meli/explo/splits_new/ood_cat/test_files_cat.txt" --dbname "/miniscratch/tengmeli/ocp/LMDB/test_cat.lmdb" --refenergy "/home/mila/t/tengmeli/ocp_meli/data/ref_energy_all.json"
+
+
+## OOD_BOTH
+#srun python main.py --mode predict --config-yml /home/mila/a/assouelr/ocp/configs/is2re/all/dimenet_plus_plus/dpp.yml --checkpoint /home/mila/a/assouelr/ocp/checkpoints/2021-04-06-10-34-40/checkpoint.pt
+
+
+## OOD_CAT
+#srun python main.py --mode predict --config-yml /home/mila/a/assouelr/ocp/configs/is2re/all/dimenet_plus_plus/dpp.yml --checkpoint /miniscratch/tengmeli/ocp/checkpoints/2021-04-06-09-47-44/checkpoint.pt
+#srun python main.py --mode predict --config-yml /home/mila/a/assouelr/ocp/configs/is2re/all/dimenet_plus_plus/dpp.yml --checkpoint /home/mila/a/assouelr/ocp/checkpoints/2021-04-07-14-57-04/checkpoint.pt

@@ -1,19 +1,24 @@
-
-from ocpmodels.preprocessing import AtomsToGraphs
-from ocpmodels.datasets import SinglePointLmdbDataset, TrajectoryLmdbDataset
 import argparse
-import ase.io
-from ase.build import bulk
-from ase.build import fcc100, add_adsorbate, molecule
-from ase.constraints import FixAtoms
-from ase.calculators.emt import EMT
-from ase.optimize import BFGS
-import matplotlib.pyplot as plt
-import lmdb
-import pickle
-from tqdm import tqdm
-import torch
+import json
 import os
+import pickle
+import sys
+
+import ase.io
+import lmdb
+import matplotlib.pyplot as plt
+import torch
+from ase.build import add_adsorbate, bulk, fcc100, molecule
+from ase.calculators.emt import EMT
+from ase.constraints import FixAtoms
+from ase.optimize import BFGS
+from tqdm import tqdm
+
+from ocpmodels.datasets import SinglePointLmdbDataset, TrajectoryLmdbDataset
+from ocpmodels.preprocessing import AtomsToGraphs
+
+sys.path.insert(1, "/home/mila/a/assouelr/ocp/")
+
 
 def read_trajectory_extract_features(a2g, traj_path):
     traj = ase.io.read(traj_path, ":")
@@ -24,16 +29,23 @@ def read_trajectory_extract_features(a2g, traj_path):
     data_objects[1].tags = torch.LongTensor(tags)
     return data_objects
 
-def make_lmdb(system_paths, db_name):
+
+def make_lmdb(system_paths, db_name, ref_energies_file=None):
     """
     arguments:
         system_paths: list of paths to .traj files
-        db_name: "db_name.lmdb" where to save the file 
+        db_name: "db_name.lmdb" where to save the file
     """
+    substract_ref = False
+    if ref_energies_file is not None:
+        substract_ref = True
+        with open(ref_energies_file, "r") as f:
+            ref_energies = json.load(f)
+
     a2g = AtomsToGraphs(
         max_neigh=50,
         radius=6,
-        r_energy=True,    # False for test data
+        r_energy=True,  # False for test data
         r_forces=True,
         r_distances=False,
         r_fixed=True,
@@ -45,38 +57,53 @@ def make_lmdb(system_paths, db_name):
         subdir=False,
         meminit=False,
         map_async=True,
-        )
+    )
 
     idx = 0
     for system in system_paths:
-    # Extract Data object
+        # Extract Data object
+
         data_objects = read_trajectory_extract_features(a2g, system)
         initial_struc = data_objects[0]
         relaxed_struc = data_objects[1]
 
-        initial_struc.y_init = initial_struc.y # subtract off reference energy, if applicable
+        initial_struc.y_init = (
+            initial_struc.y
+        )  # subtract off reference energy, if applicable
         del initial_struc.y
-        initial_struc.y_relaxed = relaxed_struc.y # subtract off reference energy, if applicable
+        initial_struc.y_relaxed = (
+            relaxed_struc.y
+        )  # subtract off reference energy, if applicable
+        if substract_ref:
+            print("susbtracting ref")
+            object_id = os.path.basename(system).split(".")[0]
+            ref_energy = ref_energies[object_id]
+            initial_struc.y_init -= ref_energy
+            initial_struc.y_relaxed -= ref_energy
+            initial_struc.system = object_id
         initial_struc.pos_relaxed = relaxed_struc.pos
 
-    # Filter data if necessary
-    # OCP filters adsorption energies > |10| eV
+        # Filter data if necessary
+        # OCP filters adsorption energies > |10| eV
 
         initial_struc.sid = idx  # arbitrary unique identifier
 
-    # no neighbor edge case check
+        # no neighbor edge case check
         if initial_struc.edge_index.shape[1] == 0:
             print("no neighbors", traj_path)
             continue
 
-    # Write to LMDB
+        # Write to LMDB
         txn = db.begin(write=True)
-        txn.put(f"{idx}".encode("ascii"), pickle.dumps(initial_struc, protocol=-1))
+        txn.put(
+            f"{idx}".encode("ascii"), pickle.dumps(initial_struc, protocol=-1)
+        )
         txn.commit()
         db.sync()
         idx += 1
 
     db.close()
+
 
 def get_parser():
     parser = argparse.ArgumentParser()
@@ -92,17 +119,22 @@ def get_parser():
         "--dbname",
         help="db name",
     )
+
+    parser.add_argument(
+        "--refenergy",
+        help="db name",
+    )
     return parser
 
 
-if __name__=="__main__":
-    
+if __name__ == "__main__":
+
     parser = get_parser()
     args = parser.parse_args()
     with open(args.paths_file, "r") as f:
         filenames = [line.rstrip() for line in f]
-    
+
     system_paths = [os.path.join(args.root, fn) for fn in filenames]
-    
-    make_lmdb(system_paths, args.dbname)
+
+    make_lmdb(system_paths, args.dbname, args.refenergy)
     print("saved file in " + args.dbname)

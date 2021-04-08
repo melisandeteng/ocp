@@ -10,15 +10,17 @@ __all__ = [
     "DimeNetPlusPlus",
     "SchNet",
     "ForceNet",
-    "DimeNetPlusPlus_hyper"
+    "DimeNetPlusPlus_hyper",
 ]
 
 from .base import BaseModel
 from .cgcnn import CGCNN
 from .dimenet import DimeNetWrap as DimeNet
 from .dimenet_plus_plus import DimeNetPlusPlusWrap as DimeNetPlusPlus
+from .dimenet_plus_plus_hyper import (
+    DimeNetPlusPlusWrap_hyper as DimeNetPlusPlus_hyper,
+)
 from .forcenet import ForceNet
-from .dimenet_plus_plus_hyper import DimeNetPlusPlusWrap_hyper as DimeNetPlusPlus_hyper
 from .schnet import SchNetWrap as SchNet
 
 DimeNet.__module__ = __name__
